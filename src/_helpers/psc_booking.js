@@ -1,6 +1,6 @@
 const BOOKINGS_KEY = "bookings";
 
-export class BookedFlightsProvider  {
+export class BookedFlightsProvider {
 
     constructor(accountProvider) {
         this.accountProvider = accountProvider;
@@ -24,6 +24,7 @@ export class BookedFlightsProvider  {
 
     restore() {
         this.setBookedFlight(this.accountProvider.decryptFromStorage(BOOKINGS_KEY));
+        return this.bookedFlight;
     }
 
     save() {

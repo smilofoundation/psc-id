@@ -1,10 +1,8 @@
-import { authHeader } from '../_helpers';
-
-const apiUrl = "http://localhost:3000";
-
 const psc_storage = require("../_helpers/psc_storage");
 const psc_account = require("../_helpers/psc_account");
 const psc_identity = require("../_helpers/psc_identity");
+const psc_wallet = require("../_helpers/psc_wallet");
+const psc_faucet = require("../_helpers/psc_faucet");
 
 const storage = new psc_storage.StorageProvider();
 const account = new psc_account.AccountProvider(storage);
@@ -19,27 +17,25 @@ export const userService = {
     delete: _delete
 };
 
-function login(username, password) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    };
+function login(password) {
+    account.password = password;
+    let identityProvider = new psc_identity.IdentityProvider(account);
+    let identity = identityProvider.restoreIdentity(account);
+    if (!identity) {
+        return Promise.reject('password is incorrect / are you registered ?');
+    }
 
-    return fetch(`${apiUrl}/users/authenticate`, requestOptions)
-        .then(handleResponse)
-        .then(user => {
-            // localStorage.setItem('user', JSON.stringify(user));
-             account.password = window.password;
+    // if login details are valid return user details and fake jwt token
+    let user = identity;
 
-            console.log("store user details and jwt token in local storage to keep user logged in between page refreshes")
-            const identityProvider = new psc_identity.IdentityProvider(account);
-            identityProvider.setToken(user, user.token);
+    //save password ?
+    window.password = password;
 
-            const identity = identityProvider.restoreIdentity(account);
+    identityProvider.setToken(user, 'fake-jwt-token');
 
-            return identity;
-        });
+    identity = identityProvider.restoreIdentity(account);
+
+    return Promise.resolve(identity);
 }
 
 function logout() {
@@ -48,73 +44,104 @@ function logout() {
 }
 
 function getAll() {
-    const requestOptions = {
-        method: 'GET',
-        headers: authHeader()
-    };
+    account.password = window.password;
+    const identityProvider = new psc_identity.IdentityProvider(account);
+    const identity = identityProvider.restoreIdentity(account);
+    if (!identity) {
+        return Promise.reject('password is incorrect');
+    }
 
-    return fetch(`${apiUrl}/users`, requestOptions).then(handleResponse);
+    const users = [];
+    users.push(identity);
+
+    return Promise.resolve(users);
 }
 
 function getById(id) {
-    const requestOptions = {
-        method: 'GET',
-        headers: authHeader()
-    };
+    account.password = window.password;
+    const identityProvider = new psc_identity.IdentityProvider(account);
+    const identity = identityProvider.restoreIdentity(account);
+    if (!identity) {
+        return Promise.reject('password is incorrect');
+    }
 
-    return fetch(`${apiUrl}/users/${id}`, requestOptions).then(handleResponse);
+    const users = [];
+    users.push(identity);
+
+    // find user by id in users array
+    let matchedUsers = users.filter(user => {
+        return user.id === id;
+    });
+    let user = matchedUsers.length ? matchedUsers[0] : null;
+
+    // respond 200 OK with user
+    return Promise.resolve(user);
 }
 
-function register(user) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
-    };
+function register(newUser) {
 
-    return fetch(`${apiUrl}/users/register`, requestOptions).then(handleResponse);
+    account.password = newUser.password;
+    const identityProvider = new psc_identity.IdentityProvider(account);
+    const identity = identityProvider.restoreIdentity(account);
+    if (identity) {
+        return Promise.reject('Could not register "' + newUser.username + '", only one user is allowed.');
+    }
+
+    //save password globally
+    window.password = newUser.password;
+
+    // save new user
+    newUser.id = 1;
+
+    identityProvider.setIdentity(newUser.username, newUser.name);
+
+    const wallet = new psc_wallet.WalletProvider(account);
+    const faucet = new psc_faucet.FaucetProvider();
+
+    wallet.createNew();
+
+    return faucet.requestFunds(wallet.getPublicKey()).then(function (data) {
+        console.log("Faucet response", data);
+        // respond 200 OK
+        return Promise.resolve(newUser);
+    });
+
+
 }
 
-function update(user) {
-    const requestOptions = {
-        method: 'PUT',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
-    };
+function update(newUser) {
 
-    return fetch(`${apiUrl}/users/${user.id}`, requestOptions).then(handleResponse);;
+    //TODO: implement update logic ?
+    account.password = newUser.password;
+    const identityProvider = new psc_identity.IdentityProvider(account);
+    const identity = identityProvider.restoreIdentity(account);
+    if (identity) {
+        return Promise.reject('Could not register "' + newUser.username + '", only one user is allowed.');
+    }
+
+    //save password globally
+    window.password = newUser.password;
+
+    // save new user
+    newUser.id = 1;
+
+    identityProvider.setIdentity(newUser.username, newUser.name);
+
+    // respond 200 OK
+    return Promise.resolve(newUser);
 }
 
 // prefixed function name with underscore because delete is a reserved word in javascript
 function _delete(id) {
-    const requestOptions = {
-        method: 'DELETE',
-        headers: authHeader()
-    };
+    account.password = window.password;
+    const identityProvider = new psc_identity.IdentityProvider(account);
+    const identity = identityProvider.restoreIdentity(account);
+    if (!identity) {
+        return Promise.reject('password is incorrect');
+    }
 
-    return fetch(`${apiUrl}/users/${id}`, requestOptions).then(function(response){
-        if (response.ok) {
-            logout();
-            location.reload(true);
-        }
-
-    });
-}
-
-function handleResponse(response) {
-    return response.text().then(text => {
-        const data = text && JSON.parse(text);
-        if (!response.ok) {
-            if (response.status === 401) {
-                // auto logout if 401 response returned from api
-                logout();
-                location.reload(true);
-            }
-
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
-        }
-
-        return data;
-    });
+    account.storageProvider.deleteEverything();
+    logout();
+    location.reload(true);
+    return Promise.resolve();
 }

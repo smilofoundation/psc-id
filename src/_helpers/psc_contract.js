@@ -1,11 +1,19 @@
-import * as Web3 from "web3";
-import { abi, bytecode } from "./psc_smartContract";
+const Web3 = require("web3");
+import {abi, bytecode} from "./psc_smartContract";
+
+const superagent = require("superagent");
 
 const CONTRACT_ADDRESS_KEY = "contract";
 
+const baseUrlNode1 = "https://node0.klm.smilo.network:444";
+const baseUrlNode2 = "https://node1.klm.smilo.network:444";
+const baseUrlNode3 = "https://node2.klm.smilo.network:444";
+const baseUrlNode4 = "https://node3.klm.smilo.network:444";
+const baseUrlNode5 = "https://node4.klm.smilo.network:444";
+
 export class ContractProvider {
 
-    constructor(walletProvider,identityProvider,accountProvider,baseUrlProvider,http) {
+    constructor(walletProvider, identityProvider, accountProvider) {
         this.sharedWithDeploy = [
             'NUK/bcNCE91Ijf9vlvbZQUrxQ9j/LZxe2eFan29nRG8=',
             'aRwxWoSsaPTZa0f4RZhU6IWMyyAM20fxQgx7PXyodEM=',
@@ -24,44 +32,35 @@ export class ContractProvider {
         this.walletProvider = walletProvider;
         this.identityProvider = identityProvider;
         this.accountProvider = accountProvider;
-        this.baseUrlProvider = baseUrlProvider;
 
-        this.walletProvider.onWalletUnlocked().subscribe(
-            async () => {
-                await this.connectToWeb3Provider();
-                await this.registerAccount();
-                await this.unlockAccount();
-                this.initialized = true;
-            }
-        );
+    }
 
-        this.accountProvider.onPasswordChanged().subscribe(
-            () => this.restore()
-        );
+    async initContract() {
+        await this.connectToWeb3Provider();
+        await this.registerAccount();
+        await this.unlockAccount();
+
+        return true;
     }
 
     connectToWeb3Provider() {
         this.web3 = new Web3("https://node0.klm.smilo.network:443");
     }
 
-    isInitialized(){
-        return this.initialized;
-    }
-
     async registerAccount() {
         try {
             let privateKey = this.walletProvider.getPrivateKey().substring(2);
             let accountImport = await this.web3.eth.personal.importRawKey(
-                    privateKey,
-                    privateKey
+                privateKey,
+                privateKey
             );
-        } catch(e) {
+        } catch (e) {
         }
     }
 
     async unlockAccount() {
         let publicKey = this.walletProvider.getPublicKey();
-        let privateKey =  this.walletProvider.getPrivateKey().substring(2);
+        let privateKey = this.walletProvider.getPrivateKey().substring(2);
         return await this.web3.eth.personal.unlockAccount(
             publicKey,
             privateKey,
@@ -74,58 +73,97 @@ export class ContractProvider {
         let flight = bookedFlight.flightId;
         let identity = this.identityProvider.getIdentity();
         let name = identity.name;
-        let passport = identity.passport;
+        let passport = identity.passport || "test123";
         let trustedArray = [];
-        trustedArray.push({name: "KLM Server", trustedAddress: "0x170ce250de1be1f83bbe5d24604538c9619bc02a", isValue: true});
-        trustedArray.push({name: "Gate 1", trustedAddress: "0xd4e88d6eb5012a58be7db508136e955d86227353", isValue: true});
-        trustedArray.push({name: "Gate 2", trustedAddress: "0xa984718e409cfbd2a054b411836411334bb6b625", isValue: true});
-        trustedArray.push({name: "Gate 4", trustedAddress: "0x6e9c44496220948787ff74e715128a7e1258b5a5", isValue: true});
+        trustedArray.push({
+            name: "KLM Server",
+            trustedAddress: "0x170ce250de1be1f83bbe5d24604538c9619bc02a",
+            isValue: true
+        });
+        trustedArray.push({
+            name: "Gate 1",
+            trustedAddress: "0xd4e88d6eb5012a58be7db508136e955d86227353",
+            isValue: true
+        });
+        trustedArray.push({
+            name: "Gate 2",
+            trustedAddress: "0xa984718e409cfbd2a054b411836411334bb6b625",
+            isValue: true
+        });
+        trustedArray.push({
+            name: "Gate 4",
+            trustedAddress: "0x6e9c44496220948787ff74e715128a7e1258b5a5",
+            isValue: true
+        });
 
         let flightpassContract = new this.web3.eth.Contract(abi);
-        return flightpassContract.deploy(
-            {
-                data: '0x' + bytecode,
-                arguments: [
-                    name,
-                    this.walletProvider.getPublicKey(),
-                    ticket,
-                    flight,
-                    passport,
-                    trustedArray
-                ]
-            }
-        ).send({
-            from: this.walletProvider.getPublicKey(),
-            gas: '4000000',
-            gasPrice: '0',
-            sharedWith: this.sharedWithDeploy
-        }).on('error', (error) => {
-            console.error(`Error deploying contract ${error}`);
-        }).on('transactionHash', (transactionHash) => {
-            console.log(`Successfully submitted contract creation. Transaction hash: ${transactionHash}`);
-        }).on('receipt', (receipt) => {
-            console.log(`Receipt after mining with contract address: ${receipt.contractAddress}`);
-        }).then((newContractInstance) => {
-            this.contractAddress = newContractInstance.options.address;
 
-            this.save();
-        }).catch((error) => {
-            console.error(error);
+        return new Promise((resolve, reject) => {
+
+            flightpassContract.deploy(
+                {
+                    data: '0x' + bytecode,
+                    arguments: [
+                        name,
+                        this.walletProvider.getPublicKey(),
+                        ticket,
+                        flight,
+                        passport,
+                        trustedArray
+                    ]
+                }
+            ).send({
+                from: this.walletProvider.getPublicKey(),
+                gas: '4000000',
+                gasPrice: '0',
+                sharedWith: this.sharedWithDeploy
+            }).on('error', (error) => {
+                console.error(`Error deploying contract ${error}`);
+                reject(`Error deploying contract ${error}`)
+            }).on('transactionHash', (transactionHash) => {
+                console.log(`Successfully submitted contract creation. Transaction hash: ${transactionHash}`);
+            }).on('receipt', (receipt) => {
+                console.log(`Receipt after mining with contract address: ${receipt.contractAddress}`);
+                this.contractAddress = receipt.contractAddress;
+
+                console.log(`Going to save contract address: ${this.contractAddress}`);
+                this.save();
+                return resolve(this.contractAddress);
+            }).catch((error) => {
+                console.error(`Error deploying contract ${error}`);
+                return reject(`Error deploying contract ${error}`)
+            });
+
         });
+
+
     }
 
     async setVectors() {
         let flightpassContract = new this.web3.eth.Contract(abi);
         flightpassContract.options.address = this.contractAddress;
         let vectors = "[" + this.identityProvider.getIdentity().faceVectors + "]";
-        return flightpassContract.methods.setVectors(
-            vectors
-        ).send({
-            from: this.walletProvider.getPublicKey(),
-            gas: '2000000',
-            gasPrice: '0',
-            sharedWith: this.sharedWithUpdate
-        });
+
+        return new Promise((resolve, reject) => {
+
+            flightpassContract.methods.setVectors(
+                vectors
+            ).send({
+                from: this.walletProvider.getPublicKey(),
+                gas: '2000000',
+                gasPrice: '0',
+                sharedWith: this.sharedWithUpdate
+            }).on('transactionHash', (transactionHash) => {
+
+                console.log("Set vectors ok", transactionHash);
+                return resolve(transactionHash);
+
+            }).catch((error) => {
+                console.error(`Error deploying setVectors ${error}`);
+                return reject(`Error deploying setVectors ${error}`)
+            });
+        })
+
     }
 
     async getVectors() {
@@ -146,7 +184,7 @@ export class ContractProvider {
         });
     }
 
-    getSmartContract(){
+    getSmartContract() {
         return this.contractAddress;
     }
 
@@ -167,11 +205,21 @@ export class ContractProvider {
 
     deleteContract() {
         let deleteArray = [
-            this.http.delete(`${this.baseUrlProvider.getBaseUrlNode1()}/transactions/${this.contractAddress}`).toPromise().then((data) => { return data }),
-            this.http.delete(`${this.baseUrlProvider.getBaseUrlNode2()}/transactions/${this.contractAddress}`).toPromise().then((data) => { return data }),
-            this.http.delete(`${this.baseUrlProvider.getBaseUrlNode3()}/transactions/${this.contractAddress}`).toPromise().then((data) => { return data }),
-            this.http.delete(`${this.baseUrlProvider.getBaseUrlNode4()}/transactions/${this.contractAddress}`).toPromise().then((data) => { return data }),
-            this.http.delete(`${this.baseUrlProvider.getBaseUrlNode5()}/transactions/${this.contractAddress}`).toPromise().then((data) => { return data })
+            superagent.delete(`${baseUrlNode1}/transactions/${this.contractAddress}`).then((data) => {
+                return data
+            }),
+            superagent.delete(`${baseUrlNode2}/transactions/${this.contractAddress}`).then((data) => {
+                return data
+            }),
+            superagent.delete(`${baseUrlNode3}/transactions/${this.contractAddress}`).then((data) => {
+                return data
+            }),
+            superagent.delete(`${baseUrlNode4}/transactions/${this.contractAddress}`).then((data) => {
+                return data
+            }),
+            superagent.delete(`${baseUrlNode5}/transactions/${this.contractAddress}`).then((data) => {
+                return data
+            })
         ];
         return Promise.all(deleteArray);
     }

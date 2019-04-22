@@ -9,7 +9,7 @@ export class FaucetProvider {
 
     requestFunds(address) {
         return superagent.get(`${baseUrl}/${address}`).then((data) => {
-            return data;
+            return Promise.resolve(data);
         });
     }
 }
