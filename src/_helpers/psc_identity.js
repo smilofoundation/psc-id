@@ -2,25 +2,20 @@ const IDENTITY_STORAGE_KEY = "identity";
 
 export class IdentityProvider {
 
-    // identity = {};
-    // accountProvider = {};
-
-    constructor(accountProvider){
+    constructor(accountProvider) {
+        this.identity = {};
         this.accountProvider = accountProvider;
-        this.accountProvider.onPasswordChanged().subscribe(
-            () => this.restoreIdentity()
-        );
     }
+
     /**
      * Updates the base identity properties.
      * @param fullName
      * @param birthDate
      * @param nationality
      */
-    setIdentity(fullName, birthDate, nationality) {
-        this.identity.fullName = fullName;
-        this.identity.birthDate = birthDate;
-        this.identity.nationality = nationality;
+    setIdentity(username, name) {
+        this.identity.username = username;
+        this.identity.name = name;
 
         this.saveIdentity();
     }
@@ -33,7 +28,9 @@ export class IdentityProvider {
      * Updates the passport
      * @param passport
      */
-    setPassport(passport) {
+    setPassport(identity, passport) {
+        this.identity = identity;
+
         this.identity.passport = passport;
 
         this.saveIdentity();
@@ -43,18 +40,36 @@ export class IdentityProvider {
      * Updates the face vectors
      * @param faceVectors
      */
-    setFaceVectors(faceVectors) {
+    setFaceVectors(identity, faceVectors) {
+        this.identity = identity;
+
         this.identity.faceVectors = faceVectors;
 
         this.saveIdentity();
     }
 
 
+    /**
+     * Updates the token
+     * @param token
+     */
+    setToken(identity, token) {
+        this.identity = identity;
+
+        this.identity.token = token;
+
+        this.saveIdentity();
+    }
+
+
     restoreIdentity(accountProvider) {
-        const restoredIdentity = this.accountProvider.decryptFromStorage(IDENTITY_STORAGE_KEY);
+        const restoredIdentity = accountProvider.decryptFromStorage(IDENTITY_STORAGE_KEY);
 
         if (restoredIdentity) {
             this.identity = restoredIdentity;
+            return this.identity;
+        } else {
+            return null;
         }
     }
 

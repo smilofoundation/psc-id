@@ -73,7 +73,7 @@ export class ContractProvider {
         let ticket = JSON.stringify(bookedFlight);
         let flight = bookedFlight.flightId;
         let identity = this.identityProvider.getIdentity();
-        let name = identity.fullName;
+        let name = identity.name;
         let passport = identity.passport;
         let trustedArray = [];
         trustedArray.push({name: "KLM Server", trustedAddress: "0x170ce250de1be1f83bbe5d24604538c9619bc02a", isValue: true});

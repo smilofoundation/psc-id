@@ -2,6 +2,13 @@ import { authHeader } from '../_helpers';
 
 const apiUrl = "http://localhost:3000";
 
+const psc_storage = require("../_helpers/psc_storage");
+const psc_account = require("../_helpers/psc_account");
+const psc_identity = require("../_helpers/psc_identity");
+
+const storage = new psc_storage.StorageProvider();
+const account = new psc_account.AccountProvider(storage);
+
 export const userService = {
     login,
     logout,
@@ -22,10 +29,16 @@ function login(username, password) {
     return fetch(`${apiUrl}/users/authenticate`, requestOptions)
         .then(handleResponse)
         .then(user => {
-            // store user details and jwt token in local storage to keep user logged in between page refreshes
-            localStorage.setItem('user', JSON.stringify(user));
+            // localStorage.setItem('user', JSON.stringify(user));
+             account.password = window.password;
 
-            return user;
+            console.log("store user details and jwt token in local storage to keep user logged in between page refreshes")
+            const identityProvider = new psc_identity.IdentityProvider(account);
+            identityProvider.setToken(user, user.token);
+
+            const identity = identityProvider.restoreIdentity(account);
+
+            return identity;
         });
 }
 
@@ -79,7 +92,13 @@ function _delete(id) {
         headers: authHeader()
     };
 
-    return fetch(`${apiUrl}/users/${id}`, requestOptions).then(handleResponse);
+    return fetch(`${apiUrl}/users/${id}`, requestOptions).then(function(response){
+        if (response.ok) {
+            logout();
+            location.reload(true);
+        }
+
+    });
 }
 
 function handleResponse(response) {
