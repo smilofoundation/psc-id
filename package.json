@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "cross-env BABEL_ENV=cjs node server.js",
+    "start-dev": "PORT=4000 cross-env BABEL_ENV=cjs node server.js",
     "test": "cross-env BABEL_ENV=cjs babel-node test/sagas.js | tap-spec",
     "dev": "webpack-dev-server --open"
   },
