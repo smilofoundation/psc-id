@@ -4,6 +4,8 @@ const psc_identity = require("../_helpers/psc_identity");
 const psc_wallet = require("../_helpers/psc_wallet");
 const psc_faucet = require("../_helpers/psc_faucet");
 
+const psc_contract = require("../_helpers/psc_contract");
+
 const storage = new psc_storage.StorageProvider();
 const account = new psc_account.AccountProvider(storage);
 
@@ -140,8 +142,21 @@ function _delete(id) {
         return Promise.reject('password is incorrect');
     }
 
-    account.storageProvider.deleteEverything();
-    logout();
-    location.reload(true);
-    return Promise.resolve();
+    // create wallet instance
+    const wallet = new psc_wallet.WalletProvider(account);
+    wallet.restoreWallet();
+
+    const contract = new psc_contract.ContractProvider(wallet, identityProvider, account);
+    contract.restore();
+
+    return contract.deleteContract().then(function () {
+        account.storageProvider.deleteEverything();
+
+        logout();
+        location.reload(true);
+        return Promise.resolve();
+
+    });
+
+
 }

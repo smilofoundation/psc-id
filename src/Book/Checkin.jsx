@@ -58,7 +58,7 @@ class CheckinPage extends React.Component {
 
         if (facevectors && facevectors.confidence > 0.95) {
             console.log("Got a good vector ", facevectors);
-            dispatch(bookActions.checkin(bookingConfirmed, facevectors));
+            dispatch(bookActions.checkin(bookingConfirmed, facevectors.vectors));
         } else {
             console.log("ERROR: Failed to get good vector! ", facevectors);
 

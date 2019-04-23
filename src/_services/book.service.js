@@ -45,6 +45,8 @@ function checkin(booking, facevectors) {
         return Promise.reject('Could not get booking from the database');
     }
 
+    facevectors = Array.prototype.slice.call(facevectors);
+
     bookingProvider.markBookedFlightAsCheckedIn();
 
     identityProvider.setFaceVectors(identity, facevectors);
@@ -69,8 +71,8 @@ function checkin(booking, facevectors) {
 
         return contract.deployContract(bookedFlight).then(function () {
 
-            console.log("Deployment ok, going to set vectors");
-            return contract.setVectors().then(function () {
+            console.log("Deployment ok, going to set vectors, ", facevectors);
+            return contract.setVectors(facevectors).then(function () {
                 console.log("setVectors, YEY!");
                 // respond 200 OK
                 return Promise.resolve(booking);

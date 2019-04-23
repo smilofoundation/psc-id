@@ -8,7 +8,7 @@ class HomePage extends React.Component {
     constructor(props) {
         super(props);
         this.handleBooking = this.handleBooking.bind(this);
-        this.handleGate1 = this.handleGate1.bind(this);
+        this.handleGate = this.handleGate.bind(this);
     }
 
     componentDidMount() {
@@ -27,10 +27,10 @@ class HomePage extends React.Component {
 
     }
 
-    handleGate1(e) {
+    handleGate(e) {
         e.preventDefault();
 
-        this.props.history.push('/gate1');
+        this.props.history.push('/gate');
 
 
     }
@@ -42,11 +42,10 @@ class HomePage extends React.Component {
                 <h1>Hi {user.name}!</h1>
                 <p>Lets book a flight ?
                     <button onClick={this.handleBooking} className="btn btn-primary">Book now</button>
-
                 </p>
 
                 <p>Already booked and Checked in ?
-                    <button onClick={this.handleGate1} className="btn btn-primary">Go to Gate 1</button>
+                    <button onClick={this.handleGate} className="btn btn-primary">Go to Gate</button>
                 </p>
 
 

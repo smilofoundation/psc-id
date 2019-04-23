@@ -9,7 +9,7 @@ import {HomePage} from '../HomePage';
 import {LoginPage} from '../LoginPage';
 import {RegisterPage} from '../RegisterPage';
 import {BookOKPage, BookPage, CheckinOKPage, CheckinPage} from '../Book';
-import {Gate1Page, Gate2Page, Gate3Page, Gate4Page} from '../GatePage'
+import {GatePage} from '../GatePage'
 
 class App extends React.Component {
     constructor(props) {
@@ -41,10 +41,8 @@ class App extends React.Component {
                                 <PrivateRoute path="/checkin" component={CheckinPage}/>
                                 <PrivateRoute path="/checkin-ok" component={CheckinOKPage}/>
 
-                                <PrivateRoute path="/gate1" component={Gate1Page}/>
-                                <PrivateRoute path="/gate2" component={Gate2Page}/>
-                                <PrivateRoute path="/gate3" component={Gate3Page}/>
-                                <PrivateRoute path="/gate4" component={Gate4Page}/>
+                                <PrivateRoute path="/gate" component={GatePage}/>
+
 
 
                             </div>

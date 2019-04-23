@@ -34,7 +34,7 @@ class CheckinOKPage extends React.Component {
 
     handleClick(e) {
         e.preventDefault();
-        this.props.history.push('/gate1');
+        this.props.history.push('/gate');
     }
 
     render() {

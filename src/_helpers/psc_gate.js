@@ -16,6 +16,7 @@ export class AuthProvider {
     }
 
     async isAllowed(faceVectors) {
+        const distanceTreshold = this.distanceTreshold|| 0.6;
         console.log("Will POST gate for access request", faceVectors);
         return superagent.post(
             `https://${ this.endpoint }/identities/biometrics`,
@@ -24,10 +25,10 @@ export class AuthProvider {
             }
         ).then(function (result) {
             console.log(result);
-            if (result.identity && result._label === "unknown") {
+            if (result.body && result.body.identity && result.body._label === "unknown") {
                 console.log("Identity unknown, ", result);
                 return false;
-            } else if (result.identity && result.identity._distance < this.distanceTreshold) {
+            } else if (result.body && result.body.identity && result.body.identity._distance < distanceTreshold) {
                 // Gate knows about this identity meaning it was shared with this gate.
                 // So: it is allowed to access!
                 console.log("Identity ok, ", result);

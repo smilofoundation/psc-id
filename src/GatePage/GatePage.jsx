@@ -6,8 +6,7 @@ import {gateActions} from '../_actions';
 import Webcam from "react-webcam";
 import {FaceVector} from "../_helpers/psc_faceVector";
 
-
-class Gate1Page extends React.Component {
+class GatePage extends React.Component {
 
     constructor(props) {
         super(props);
@@ -22,7 +21,6 @@ class Gate1Page extends React.Component {
         this.capture = this.capture.bind(this);
 
         this.faceapi = new FaceVector();
-
     }
 
 
@@ -37,15 +35,13 @@ class Gate1Page extends React.Component {
         });
     }
 
-
-
-
     setRef(webcam) {
         this.webcam = webcam;
     };
 
     async capture() {
         const {dispatch} = this.props;
+        const gate = this.props.match.params.gate || "node1";
 
         const imageSrc = this.webcam.getScreenshot();
 
@@ -53,12 +49,10 @@ class Gate1Page extends React.Component {
 
         if (facevectors && facevectors.confidence > 0.95) {
             console.log("Got a good vector ", facevectors);
-            dispatch(gateActions.auth("node1.klm.smilo.network:444",facevectors.vectors));
+            dispatch(gateActions.auth(`${gate}.klm.smilo.network:444`,facevectors.vectors));
         } else {
             console.log("ERROR: Failed to get good vector! ", facevectors);
-
         }
-
     };
 
     render() {
@@ -68,10 +62,8 @@ class Gate1Page extends React.Component {
             facingMode: "user"
         };
 
-
         return (
             <div>
-
                 <Webcam
                     audio={false}
                     height={350}
@@ -96,5 +88,5 @@ function mapStateToProps(state) {
     };
 }
 
-const connectedBookPage = connect(mapStateToProps)(Gate1Page);
-export {connectedBookPage as Gate1Page};
+const connectedBookPage = connect(mapStateToProps)(GatePage);
+export {connectedBookPage as GatePage};

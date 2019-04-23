@@ -74,27 +74,23 @@ export class ContractProvider {
         let identity = this.identityProvider.getIdentity();
         let name = identity.name;
         let passport = identity.passport || "test123";
-        let trustedArray = [];
-        trustedArray.push({
+        let trustedArray = [{
             name: "KLM Server",
             trustedAddress: "0x170ce250de1be1f83bbe5d24604538c9619bc02a",
             isValue: true
-        });
-        trustedArray.push({
+        },{
             name: "Gate 1",
             trustedAddress: "0xd4e88d6eb5012a58be7db508136e955d86227353",
             isValue: true
-        });
-        trustedArray.push({
+        },{
             name: "Gate 2",
             trustedAddress: "0xa984718e409cfbd2a054b411836411334bb6b625",
             isValue: true
-        });
-        trustedArray.push({
+        },{
             name: "Gate 4",
             trustedAddress: "0x6e9c44496220948787ff74e715128a7e1258b5a5",
             isValue: true
-        });
+        }];
 
         let flightpassContract = new this.web3.eth.Contract(abi);
 
@@ -139,15 +135,16 @@ export class ContractProvider {
 
     }
 
-    async setVectors() {
+    async setVectors(faceVectors) {
         let flightpassContract = new this.web3.eth.Contract(abi);
         flightpassContract.options.address = this.contractAddress;
-        let vectors = "[" + this.identityProvider.getIdentity().faceVectors + "]";
+
+        console.log("setVectors, faceVectors,",faceVectors);
 
         return new Promise((resolve, reject) => {
 
             flightpassContract.methods.setVectors(
-                vectors
+                JSON.stringify(faceVectors)
             ).send({
                 from: this.walletProvider.getPublicKey(),
                 gas: '2000000',
