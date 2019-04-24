@@ -2,11 +2,23 @@ const serveStatic = require('serve-static');
 const path = require('path');
 const timeout = require('connect-timeout');
 
+var webpack = require('webpack')
+var webpackDevMiddleware = require('webpack-dev-middleware')
+var webpackHotMiddleware = require('webpack-hot-middleware')
+var config = require('./webpack.config')
+
 var app = new (require('express'))()
 const PORT = parseInt(process.env.PORT || "3000");
 
+var compiler = webpack(config)
+
 //disable powered by
 app.disable('x-powered-by');
+
+
+app.use(webpackDevMiddleware(compiler, {noInfo: true, publicPath: config.output.publicPath}))
+app.use(webpackHotMiddleware(compiler))
+
 
 app.use(serveStatic(path.join(__dirname, 'public')))
 
