@@ -4,27 +4,26 @@ const Fiber = require('fibers');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
+var entry = process.env.NODE_ENV === "production" ? {app: path.join(__dirname, 'src', 'main.jsx')} : [
+    'webpack-hot-middleware/client?reload=true',
+    path.join(__dirname, 'src', 'main.jsx')
+]
+
+console.log("Webpack.config", entry);
+
 module.exports = {
     devtool: 'cheap-module-eval-source-map',
     resolve: {
         extensions: ['.js', '.jsx'],
     },
-    entry: {
-        app: path.join(__dirname, 'src', 'main.jsx'),
-    },
+    entry: entry,
     plugins: [
         new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
 
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development')
-        }),
-        new MiniCssExtractPlugin({
-            // Options similar to the same options in webpackOptions.output
-            // both options are optional
-            filename: "[name].css",
-            chunkFilename: "[id].css"
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV||"development")
         }),
         new HtmlWebpackPlugin({
             template: './src/index.html'
@@ -35,23 +34,8 @@ module.exports = {
             test: /\.(js|jsx)$/,
             loaders: ['babel-loader'],
             exclude: /node_modules/,
-            include: /src/
-        },
-            {
-                test: /\.scss$/,
-                use: [{
-                    loader: process.env.NODE_ENV !== 'production' ? 'style-loader' : MiniCssExtractPlugin.loader
-                }, {
-                    loader: "css-loader"
-                }, {
-                    loader: "sass-loader",
-                    options: {
-                        implementation: require("sass"),
-                        fiber: Fiber
-                    }
-                }]
-            }
-        ]
+            include: __dirname
+        }]
     },
     optimization: {
         splitChunks: {

@@ -51,7 +51,8 @@ class BookOKPage extends React.Component {
 
             <div className="col-md-6 col-md-offset-3">
                     <div className="klm-header-container">
-                        <h1 className="klm-header">Congratulations, your booking is confirmed. </h1>
+                        <h1 className="klm-header">Congratulations </h1>
+                        <h2>Your booking is confirmed.</h2>
                         <h3>Please proceed to check-in.</h3>
                     </div>
                     <div className="main-info">
