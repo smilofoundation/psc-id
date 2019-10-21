@@ -1,11 +1,10 @@
 export class BaseUrlProvider {
 
     constructor() {
-        this.baseUrlNode1 = "https://node0.klm.smilo.network:444";
-        this.baseUrlNode2 = "https://node1.klm.smilo.network:444";
-        this.baseUrlNode3 = "https://node2.klm.smilo.network:444";
-        this.baseUrlNode4 = "https://node3.klm.smilo.network:444";
-        this.baseUrlNode5 = "https://node4.klm.smilo.network:444";
+        this.baseUrlNode1 = "https://psc1.smilo.foundation";
+        this.baseUrlNode2 = "https://psc2.smilo.foundation";
+        this.baseUrlNode3 = "https://psc3.smilo.foundation";
+        this.baseUrlNode4 = "https://psc4.smilo.foundation";
     }
 
     getBaseUrlNode1(){
@@ -24,7 +23,7 @@ export class BaseUrlProvider {
         return this.baseUrlNode4;
     }
 
-    getBaseUrlNode5(){
-        return this.baseUrlNode5;
-    }
+    // getBaseUrlNode5(){
+    //     return this.baseUrlNode5;
+    // }
 }

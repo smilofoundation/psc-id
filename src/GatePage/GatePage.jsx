@@ -57,7 +57,7 @@ class GatePage extends React.Component {
         });
 
         let params = queryString.parse(this.props.location.search);
-        const gate = params.gate || "node1";
+        const gate = params.gate || "psc1";
 
         const imageSrc = this.webcam.getScreenshot();
 
@@ -65,7 +65,7 @@ class GatePage extends React.Component {
 
         if (facevectors && facevectors.confidence > 0.95) {
             console.log("Got a good vector ", facevectors);
-            dispatch(gateActions.auth(`${gate}.klm.smilo.network:444`, facevectors.vectors));
+            dispatch(gateActions.auth(`${gate}.smilo.foundation`, facevectors.vectors));
         } else {
             console.log("ERROR: Failed to get good vector! ", facevectors);
             dispatch(alertActions.error("Failed to get a good picture, please try again. "));
@@ -87,7 +87,7 @@ class GatePage extends React.Component {
             value: parseInt(id) - 1
         })
 
-        this.props.history.push('/gate?gate=node' + e.currentTarget.id);
+        this.props.history.push('/gate?gate=psc' + e.currentTarget.id);
     }
 
     render() {
@@ -95,7 +95,7 @@ class GatePage extends React.Component {
         const {registering} = this.state;
 
         let params = queryString.parse(this.props.location.search);
-        const gate = params.gate || "node1";
+        const gate = params.gate || "psc1";
         const {value} = this.state;
 
 

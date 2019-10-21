@@ -1,6 +1,6 @@
 const superagent = require("superagent");
 
-const baseUrl = "https://testnet-faucet.smilo.network/api/request/smilo";
+const baseUrl = "https://faucet.smilo.foundation/api/request/smilo"
 export class FaucetProvider {
 
     constructor(){
@@ -8,6 +8,7 @@ export class FaucetProvider {
     }
 
     requestFunds(address) {
+        console.log(`going to trigger faucet ${baseUrl}/${address}`)
         return superagent.get(`${baseUrl}/${address}`).then((data) => {
             return Promise.resolve(data);
         });

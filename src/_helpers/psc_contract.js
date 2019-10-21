@@ -5,28 +5,27 @@ const superagent = require("superagent");
 
 const CONTRACT_ADDRESS_KEY = "contract";
 
-const baseUrlNode1 = "https://node0.klm.smilo.network:444";
-const baseUrlNode2 = "https://node1.klm.smilo.network:444";
-const baseUrlNode3 = "https://node2.klm.smilo.network:444";
-const baseUrlNode4 = "https://node3.klm.smilo.network:444";
-const baseUrlNode5 = "https://node4.klm.smilo.network:444";
+const baseUrlNode1 = "https://psc1.smilo.foundation";
+const baseUrlNode2 = "https://psc2.smilo.foundation";
+const baseUrlNode3 = "https://psc3.smilo.foundation";
+const baseUrlNode4 = "https://psc4.smilo.foundation";
 
 export class ContractProvider {
 
     constructor(walletProvider, identityProvider, accountProvider) {
         this.sharedWithDeploy = [
-            'NUK/bcNCE91Ijf9vlvbZQUrxQ9j/LZxe2eFan29nRG8=',
-            'aRwxWoSsaPTZa0f4RZhU6IWMyyAM20fxQgx7PXyodEM=',
-            'rA3MNKuWmW/Fng1NSl5p8BhBCy0psoUG9pgH/IwM+A8=',
-            'ITWEZCbs3DGB4l0TZ1LbIJ2tBRGpizTmVvzksTZZTE4=',
-            'CiGtWnwyU4MY8AO/mrTt3Gv7ajic5DdnLTVqjhX13VU='
+            'MD3fapkkHUn86h/W7AUhiD4NiDFkuIxtuRr0Nge27Bk=',
+            'OeVDzTdR95fhLKIgpBLxqdDNXYzgozgi7dnnS125A3w=',
+            'URgycWQGB6CzMvk4bzoW5xCnDZP667PyL/yKHEgJnUA=',
+            'RAXIDkqHcu6yArkvXP5pNWcHPb1Iw2eKlZcYvxMU8T8=',
+            'wH0/DxxUak9dIz5Uy9HH/YNPbGzk39QMymaYKkj4PCo='
         ];
 
         this.sharedWithUpdate = [
-            'NUK/bcNCE91Ijf9vlvbZQUrxQ9j/LZxe2eFan29nRG8=',
-            'aRwxWoSsaPTZa0f4RZhU6IWMyyAM20fxQgx7PXyodEM=',
-            'rA3MNKuWmW/Fng1NSl5p8BhBCy0psoUG9pgH/IwM+A8=',
-            'CiGtWnwyU4MY8AO/mrTt3Gv7ajic5DdnLTVqjhX13VU='
+            'MD3fapkkHUn86h/W7AUhiD4NiDFkuIxtuRr0Nge27Bk=',
+            'OeVDzTdR95fhLKIgpBLxqdDNXYzgozgi7dnnS125A3w=',
+            'URgycWQGB6CzMvk4bzoW5xCnDZP667PyL/yKHEgJnUA=',
+            'wH0/DxxUak9dIz5Uy9HH/YNPbGzk39QMymaYKkj4PCo='
         ];
 
         this.walletProvider = walletProvider;
@@ -44,7 +43,7 @@ export class ContractProvider {
     }
 
     connectToWeb3Provider() {
-        this.web3 = new Web3("https://node0.klm.smilo.network:443");
+        this.web3 = new Web3("https://node1.smilo.foundation");
     }
 
     async registerAccount() {
@@ -76,19 +75,19 @@ export class ContractProvider {
         let passport = identity.passport || "test123";
         let trustedArray = [{
             name: "KLM Server",
-            trustedAddress: "0x170ce250de1be1f83bbe5d24604538c9619bc02a",
+            trustedAddress: "0xecf7e57d01d3d155e5fc33dbc7a58355685ba39c",
             isValue: true
         },{
             name: "Gate 1",
-            trustedAddress: "0xd4e88d6eb5012a58be7db508136e955d86227353",
+            trustedAddress: "0xc0ce2fd65f71c6ce82d22db11fcf7ca43357f172",
             isValue: true
         },{
             name: "Gate 2",
-            trustedAddress: "0xa984718e409cfbd2a054b411836411334bb6b625",
+            trustedAddress: "0x7cb791430d2461268691bfba6e35d8a8c7ea2e63",
             isValue: true
         },{
             name: "Gate 4",
-            trustedAddress: "0x6e9c44496220948787ff74e715128a7e1258b5a5",
+            trustedAddress: "0xd54924701cd0d94d677d0a66dee75c978e175c74",
             isValue: true
         }];
 
@@ -214,9 +213,9 @@ export class ContractProvider {
             superagent.delete(`${baseUrlNode4}/transactions/${this.contractAddress}`).then((data) => {
                 return data
             }),
-            superagent.delete(`${baseUrlNode5}/transactions/${this.contractAddress}`).then((data) => {
-                return data
-            })
+            // superagent.delete(`${baseUrlNode5}/transactions/${this.contractAddress}`).then((data) => {
+            //     return data
+            // })
         ];
         return Promise.all(deleteArray);
     }
